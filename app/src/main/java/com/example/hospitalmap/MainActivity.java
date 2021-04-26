@@ -16,6 +16,17 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.android.volley.Cache;
+import com.android.volley.Network;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.BasicNetwork;
+import com.android.volley.toolbox.DiskBasedCache;
+import com.android.volley.toolbox.HurlStack;
+import com.android.volley.toolbox.StringRequest;
+
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapReverseGeoCoder;
 import net.daum.mf.map.api.MapView;
@@ -35,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         setContentView(R.layout.activity_main);
         View decorView = getWindow().getDecorView();
 
+        getHospitalList();
         mMapView = (MapView) findViewById(R.id.map_view);
         //mMapView.setDaumMapApiKey(MapApiConst.DAUM_MAPS_ANDROID_APP_API_KEY);
         mMapView.setCurrentLocationEventListener(this);
@@ -140,6 +152,33 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
             }
 
         }
+    }
+
+    public void getHospitalList() {
+        RequestQueue requestQueue;
+        Cache cache = new DiskBasedCache(getCacheDir(), 1024 * 1024);
+        Network network = new BasicNetwork(new HurlStack());
+        requestQueue = new RequestQueue(cache, network);
+        requestQueue.start();
+
+        String url = "http://apis.data.go.kr/B551182/hospInfoService/getHospBasisList?dgsbjtCd=01&xPos=127.09854004628151&yPos=37.6132113197367&radius=3000&ServiceKey=Q%2BbQw%2FUNPpDxP9hAGr3SQzR71t%2BCRCoDcFtPYmxVpEdlObYNjUINxMD3hurNngT3r19ae%2FDHw7t%2B5YhzIm2EuA%3D%3D&_type=json";
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // 응답
+                        System.out.println("응답 : " + response);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // 에러 처리
+                        error.printStackTrace();
+                    }
+                });
+        requestQueue.add(stringRequest);
     }
 
     void checkRunTimePermission(){
