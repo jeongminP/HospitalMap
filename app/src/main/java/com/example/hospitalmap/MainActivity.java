@@ -14,16 +14,23 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Cache;
 import com.android.volley.Network;
+import com.android.volley.NetworkResponse;
+import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
+import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.StringRequest;
 
@@ -31,10 +38,19 @@ import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapReverseGeoCoder;
 import net.daum.mf.map.api.MapView;
 
-public class MainActivity extends AppCompatActivity implements MapView.CurrentLocationEventListener, MapReverseGeoCoder.ReverseGeoCodingResultListener {
+import java.io.UnsupportedEncodingException;
+import java.util.Map;
+
+public class MainActivity extends AppCompatActivity implements MapView.CurrentLocationEventListener,
+        MapReverseGeoCoder.ReverseGeoCodingResultListener,
+        MapView.MapViewEventListener {
     private static final String LOG_TAG = "MainActivity";
 
     private MapView mMapView;
+    private ProgressBar progressBar;
+    private ImageButton currentLocationBtn;
+
+    private MapPoint currentLocation;
 
     private static final int GPS_ENABLE_REQUEST_CODE = 2001;
     private static final int PERMISSIONS_REQUEST_CODE = 100;
@@ -46,10 +62,21 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         setContentView(R.layout.activity_main);
         View decorView = getWindow().getDecorView();
 
-        getHospitalList();
         mMapView = (MapView) findViewById(R.id.map_view);
-        //mMapView.setDaumMapApiKey(MapApiConst.DAUM_MAPS_ANDROID_APP_API_KEY);
         mMapView.setCurrentLocationEventListener(this);
+        mMapView.setMapViewEventListener(this);
+
+        progressBar = findViewById(R.id.wating_progress_bar);
+        currentLocationBtn = findViewById(R.id.current_location_btn);
+
+        currentLocationBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (currentLocation != null) {
+                    mMapView.setMapCenterPoint(currentLocation, true);
+                }
+            }
+        });
 
         if (!checkLocationServicesStatus()) {
             showDialogForLocationServiceSetting();
@@ -65,12 +92,16 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         mMapView.setShowCurrentLocationMarker(false);
     }
 
+    /*
+        MapView.CurrentLocationEventListener 구현
+     */
+
     @Override
     public void onCurrentLocationUpdate(MapView mapView, MapPoint currentLocation, float accuracyInMeters) {
+        this.currentLocation = currentLocation;
         MapPoint.GeoCoordinate mapPointGeo = currentLocation.getMapPointGeoCoord();
         Log.i(LOG_TAG, String.format("MapView onCurrentLocationUpdate (%f,%f) accuracy (%f)", mapPointGeo.latitude, mapPointGeo.longitude, accuracyInMeters));
     }
-
 
     @Override
     public void onCurrentLocationDeviceHeadingUpdate(MapView mapView, float v) {
@@ -87,9 +118,66 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
     }
 
+    /*
+        MapView.MapViewEventListener 구현
+     */
+    @Override
+    public void onMapViewInitialized(MapView mapView) {
+
+    }
+
+    @Override
+    public void onMapViewCenterPointMoved(MapView mapView, MapPoint mapPoint) {
+
+    }
+
+    @Override
+    public void onMapViewZoomLevelChanged(MapView mapView, int i) {
+
+    }
+
+    @Override
+    public void onMapViewSingleTapped(MapView mapView, MapPoint mapPoint) {
+
+    }
+
+    @Override
+    public void onMapViewDoubleTapped(MapView mapView, MapPoint mapPoint) {
+
+    }
+
+    @Override
+    public void onMapViewLongPressed(MapView mapView, MapPoint mapPoint) {
+
+    }
+
+    @Override
+    public void onMapViewDragStarted(MapView mapView, MapPoint mapPoint) {
+        System.out.println("지도 움직이기 시작!!");
+        mMapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOnWithoutHeadingWithoutMapMoving);
+    }
+
+    @Override
+    public void onMapViewDragEnded(MapView mapView, MapPoint mapPoint) {
+
+    }
+
+    @Override
+    public void onMapViewMoveFinished(MapView mapView, MapPoint mapPoint) {
+        System.out.println("지도 움직이기 끝!");
+        MapPoint.GeoCoordinate mapPointGeo = mapPoint.getMapPointGeoCoord();
+        MapReverseGeoCoder reverseGeoCoder = new MapReverseGeoCoder(getResources().getString(R.string.rest_api_key), mapPoint, this, this);
+        reverseGeoCoder.startFindingAddress();
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    /*
+        MapReverseGeoCoder.ReverseGeoCodingResultListener 구현
+     */
+
     @Override
     public void onReverseGeoCoderFoundAddress(MapReverseGeoCoder mapReverseGeoCoder, String s) {
-        mapReverseGeoCoder.toString();
+        getHospitalList(parseEMDongNm(s));
         onFinishReverseGeoCoding(s);
     }
 
@@ -98,12 +186,67 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         onFinishReverseGeoCoding("Fail");
     }
 
+    private String parseEMDongNm(String addrStr) {
+        String[] splitList = addrStr.split(" ");
+        for (String s : splitList) {
+            String last = s.substring(s.length() - 1);
+            if (last.equals("읍") || last.equals("면") || last.equals("동")) {
+                return s;
+            }
+        }
+        return "";
+    }
+
     private void onFinishReverseGeoCoding(String result) {
+        System.out.println("Reverse Geo-coding : " + result);
 //        Toast.makeText(LocationDemoActivity.this, "Reverse Geo-coding : " + result, Toast.LENGTH_SHORT).show();
     }
 
+    public void getHospitalList(String emdongNm) {
+        RequestQueue requestQueue;
+        Cache cache = new DiskBasedCache(getCacheDir(), 1024 * 1024);
+        Network network = new BasicNetwork(new HurlStack());
+        requestQueue = new RequestQueue(cache, network);
+        requestQueue.start();
 
+        String url = "http://apis.data.go.kr/B551182/hospInfoService/getHospBasisList?dgsbjtCd=01&emdongNm=" + emdongNm + "&ServiceKey=Q%2BbQw%2FUNPpDxP9hAGr3SQzR71t%2BCRCoDcFtPYmxVpEdlObYNjUINxMD3hurNngT3r19ae%2FDHw7t%2B5YhzIm2EuA%3D%3D&_type=json";
 
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // 응답
+                        System.out.println("응답 : " + response);
+                        progressBar.setVisibility(View.INVISIBLE);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // 에러 처리
+                        error.printStackTrace();
+                    }
+                }){
+            @Override //response를 UTF8로 변경해주는 소스코드
+            protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                try {
+                    String utf8String = new String(response.data, "UTF-8");
+                    return Response.success(utf8String, HttpHeaderParser.parseCacheHeaders(response));
+                } catch (UnsupportedEncodingException e) {
+                    // log error
+                    return Response.error(new ParseError(e));
+                } catch (Exception e) {
+                    // log error
+                    return Response.error(new ParseError(e));
+                }
+            }
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                return super.getParams();
+            }
+        };
+        requestQueue.add(stringRequest);
+    }
 
     /*
      * ActivityCompat.requestPermissions를 사용한 퍼미션 요청의 결과를 리턴받는 메소드입니다.
@@ -152,33 +295,6 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
             }
 
         }
-    }
-
-    public void getHospitalList() {
-        RequestQueue requestQueue;
-        Cache cache = new DiskBasedCache(getCacheDir(), 1024 * 1024);
-        Network network = new BasicNetwork(new HurlStack());
-        requestQueue = new RequestQueue(cache, network);
-        requestQueue.start();
-
-        String url = "http://apis.data.go.kr/B551182/hospInfoService/getHospBasisList?dgsbjtCd=01&xPos=127.09854004628151&yPos=37.6132113197367&radius=3000&ServiceKey=Q%2BbQw%2FUNPpDxP9hAGr3SQzR71t%2BCRCoDcFtPYmxVpEdlObYNjUINxMD3hurNngT3r19ae%2FDHw7t%2B5YhzIm2EuA%3D%3D&_type=json";
-
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // 응답
-                        System.out.println("응답 : " + response);
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // 에러 처리
-                        error.printStackTrace();
-                    }
-                });
-        requestQueue.add(stringRequest);
     }
 
     void checkRunTimePermission(){

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">HospitalMap</string>
+    <string name="rest_api_key">7d2feecc4ac3c347ea3accbc8ae653fc</string>
 </resources>
