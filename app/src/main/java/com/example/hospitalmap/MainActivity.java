@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -14,9 +15,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -39,6 +41,7 @@ import net.daum.mf.map.api.MapReverseGeoCoder;
 import net.daum.mf.map.api.MapView;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements MapView.CurrentLocationEventListener,
@@ -47,10 +50,14 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     private static final String LOG_TAG = "MainActivity";
 
     private MapView mMapView;
-    private ProgressBar progressBar;
+    private LinearLayout choiceView;
+    private TextView choiceTextView;
     private ImageButton currentLocationBtn;
+    private ProgressBar progressBar;
 
     private MapPoint currentLocation;
+    private DepartmentCode deptCode;
+    private SharedPreferences sharedPreferences;
 
     private static final int GPS_ENABLE_REQUEST_CODE = 2001;
     private static final int PERMISSIONS_REQUEST_CODE = 100;
@@ -60,14 +67,56 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        View decorView = getWindow().getDecorView();
+//        View decorView = getWindow().getDecorView();
 
         mMapView = (MapView) findViewById(R.id.map_view);
         mMapView.setCurrentLocationEventListener(this);
         mMapView.setMapViewEventListener(this);
 
-        progressBar = findViewById(R.id.wating_progress_bar);
+        choiceView = findViewById(R.id.choice_dept_view);
+        choiceTextView = findViewById(R.id.choice_textview);
         currentLocationBtn = findViewById(R.id.current_location_btn);
+        progressBar = findViewById(R.id.wating_progress_bar);
+
+        sharedPreferences = getSharedPreferences(getResources().getString(R.string.shared_preferences_file_name), MODE_PRIVATE);
+        deptCode = DepartmentCode.valueOf(sharedPreferences.getString(getResources().getString(R.string.sp_stored_department), "IM"));
+        choiceTextView.setText(deptCode.getDepartmentName());
+
+        if (!checkLocationServicesStatus()) {
+            showDialogForLocationServiceSetting();
+        } else {
+            checkRunTimePermission();
+        }
+
+        choiceView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final DepartmentCode[] deptCodeArray = DepartmentCode.values();
+                ArrayList<String> deptNameArray = new ArrayList<String>();
+                for (DepartmentCode deptCode: DepartmentCode.values()) {
+                    deptNameArray.add(deptCode.getDepartmentName());
+                }
+                final String[] deptArr = deptNameArray.toArray(new String[deptNameArray.size()]);
+
+                AlertDialog.Builder dlg = new AlertDialog.Builder(MainActivity.this);
+                dlg.setTitle("진료과목 선택");
+                dlg.setItems(deptArr, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        deptCode = deptCodeArray[which];
+                        choiceTextView.setText(deptCode.getDepartmentName());
+                        MapReverseGeoCoder reverseGeoCoder = new MapReverseGeoCoder(getResources().getString(R.string.rest_api_key),
+                                mMapView.getMapCenterPoint(),
+                                MainActivity.this,
+                                MainActivity.this);
+                        reverseGeoCoder.startFindingAddress();
+                        progressBar.setVisibility(View.VISIBLE);
+                        dialog.dismiss();
+                    }
+                });
+                dlg.show();
+            }
+        });
 
         currentLocationBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,12 +126,6 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
                 }
             }
         });
-
-        if (!checkLocationServicesStatus()) {
-            showDialogForLocationServiceSetting();
-        }else {
-            checkRunTimePermission();
-        }
     }
 
     @Override
@@ -90,6 +133,10 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         super.onDestroy();
         mMapView.setCurrentLocationTrackingMode(MapView.CurrentLocationTrackingMode.TrackingModeOff);
         mMapView.setShowCurrentLocationMarker(false);
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(getResources().getString(R.string.sp_stored_department), deptCode.toString());
+        editor.apply();
     }
 
     /*
@@ -166,7 +213,10 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     public void onMapViewMoveFinished(MapView mapView, MapPoint mapPoint) {
         System.out.println("지도 움직이기 끝!");
         MapPoint.GeoCoordinate mapPointGeo = mapPoint.getMapPointGeoCoord();
-        MapReverseGeoCoder reverseGeoCoder = new MapReverseGeoCoder(getResources().getString(R.string.rest_api_key), mapPoint, this, this);
+        MapReverseGeoCoder reverseGeoCoder = new MapReverseGeoCoder(getResources().getString(R.string.rest_api_key),
+                mapPoint,
+                this,
+                this);
         reverseGeoCoder.startFindingAddress();
         progressBar.setVisibility(View.VISIBLE);
     }
@@ -177,7 +227,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
     @Override
     public void onReverseGeoCoderFoundAddress(MapReverseGeoCoder mapReverseGeoCoder, String s) {
-        getHospitalList(parseEMDongNm(s));
+        getHospitalList(deptCode, parseEMDongNm(s));
         onFinishReverseGeoCoding(s);
     }
 
@@ -202,14 +252,16 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 //        Toast.makeText(LocationDemoActivity.this, "Reverse Geo-coding : " + result, Toast.LENGTH_SHORT).show();
     }
 
-    public void getHospitalList(String emdongNm) {
+    public void getHospitalList(DepartmentCode deptCode, String emdongNm) {
         RequestQueue requestQueue;
         Cache cache = new DiskBasedCache(getCacheDir(), 1024 * 1024);
         Network network = new BasicNetwork(new HurlStack());
         requestQueue = new RequestQueue(cache, network);
         requestQueue.start();
 
-        String url = "http://apis.data.go.kr/B551182/hospInfoService/getHospBasisList?dgsbjtCd=01&emdongNm=" + emdongNm + "&ServiceKey=Q%2BbQw%2FUNPpDxP9hAGr3SQzR71t%2BCRCoDcFtPYmxVpEdlObYNjUINxMD3hurNngT3r19ae%2FDHw7t%2B5YhzIm2EuA%3D%3D&_type=json";
+        String url = "http://apis.data.go.kr/B551182/hospInfoService/getHospBasisList?dgsbjtCd=" + deptCode.getCode()
+                + "&emdongNm=" + emdongNm
+                + "&ServiceKey=Q%2BbQw%2FUNPpDxP9hAGr3SQzR71t%2BCRCoDcFtPYmxVpEdlObYNjUINxMD3hurNngT3r19ae%2FDHw7t%2B5YhzIm2EuA%3D%3D&_type=json";
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
@@ -218,6 +270,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
                         // 응답
                         System.out.println("응답 : " + response);
                         progressBar.setVisibility(View.INVISIBLE);
+                        // TODO - 응답으로 온 데이터를 처리하고 지도에 마킹
                     }
                 },
                 new Response.ErrorListener() {

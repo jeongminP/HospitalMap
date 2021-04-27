@@ -12,11 +12,29 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <ProgressBar
-        android:id="@+id/wating_progress_bar"
-        android:layout_centerInParent="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:id="@+id/choice_dept_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="15dp"
+        android:background="#ffffff"
+
+        android:orientation="vertical" >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="진료과목 선택"
+            android:textSize="15dp"
+            android:textColor="#000000"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/choice_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="내과"
+            android:textSize="30dp"
+            android:textColor="#000000" />
+    </LinearLayout>
 
     <ImageButton
         android:id="@+id/current_location_btn"
@@ -26,6 +44,13 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:background="#ffffff"
+        android:tint="#0000ff"
         android:src="@drawable/current_location_icon" />
+
+    <ProgressBar
+        android:id="@+id/wating_progress_bar"
+        android:layout_centerInParent="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
 </RelativeLayout>
