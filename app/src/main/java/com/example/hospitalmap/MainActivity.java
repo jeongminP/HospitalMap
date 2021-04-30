@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -55,18 +56,20 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity implements MapView.CurrentLocationEventListener,
+public class MainActivity extends AppCompatActivity
+        implements MapView.CurrentLocationEventListener,
         MapReverseGeoCoder.ReverseGeoCodingResultListener,
         MapView.MapViewEventListener {
     private static final String LOG_TAG = "MainActivity";
 
     private MapView mMapView;
     private LinearLayout choiceView;
-    private TextView choiceTextView;
+    private TextView deptTextView;
     private ImageButton currentLocationBtn;
-    private ProgressBar progressBar;
+    private View loadingView;
 
     private MapPoint currentLocation;
+    private String centerEMDong = "";
     private DepartmentCode deptCode;
     private SharedPreferences sharedPreferences;
     private ArrayList<HospitalItem> hospitalItemList;
@@ -79,21 +82,25 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-//        View decorView = getWindow().getDecorView();
+
+        Intent intent = getIntent();
+        Double latitude = intent.getDoubleExtra("latitude", 0);
+        Double longitude = intent.getDoubleExtra("longitude", 0);
 
         mMapView = (MapView) findViewById(R.id.map_view);
-        mMapView.setZoomLevel(4, true);
+        mMapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(latitude, longitude), false);
         mMapView.setCurrentLocationEventListener(this);
         mMapView.setMapViewEventListener(this);
 
         choiceView = findViewById(R.id.choice_dept_view);
-        choiceTextView = findViewById(R.id.choice_textview);
+        deptTextView = findViewById(R.id.dept_textview);
         currentLocationBtn = findViewById(R.id.current_location_btn);
-        progressBar = findViewById(R.id.wating_progress_bar);
+        loadingView = findViewById(R.id.loading_view);
 
         sharedPreferences = getSharedPreferences(getResources().getString(R.string.shared_preferences_file_name), MODE_PRIVATE);
         deptCode = DepartmentCode.valueOf(sharedPreferences.getString(getResources().getString(R.string.sp_stored_department), "IM"));
-        choiceTextView.setText(deptCode.getDepartmentName());
+        deptTextView.setText(deptCode.getDepartmentName());
+        hideLoadingView();
 
         if (!checkLocationServicesStatus()) {
             showDialogForLocationServiceSetting();
@@ -117,13 +124,14 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         deptCode = deptCodeArray[which];
-                        choiceTextView.setText(deptCode.getDepartmentName());
+                        deptTextView.setText(deptCode.getDepartmentName());
                         MapReverseGeoCoder reverseGeoCoder = new MapReverseGeoCoder(getResources().getString(R.string.rest_api_key),
                                 mMapView.getMapCenterPoint(),
                                 MainActivity.this,
                                 MainActivity.this);
                         reverseGeoCoder.startFindingAddress();
-                        progressBar.setVisibility(View.VISIBLE);
+
+                        showLoadingView();
                         dialog.dismiss();
                     }
                 });
@@ -140,7 +148,12 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
             }
         });
 
-        currentLocationBtn.callOnClick();
+        loadingView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
     }
 
     @Override
@@ -154,16 +167,20 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         editor.apply();
     }
 
+    private void showLoadingView() {
+        loadingView.setVisibility(View.VISIBLE);
+    }
+
+    private void hideLoadingView() {
+        loadingView.setVisibility(View.INVISIBLE);
+    }
+
     /*
         MapView.CurrentLocationEventListener 구현
      */
 
     @Override
     public void onCurrentLocationUpdate(MapView mapView, MapPoint currentLocation, float accuracyInMeters) {
-        // 현재 위치 최초 수신 시 맵 이동
-        if (this.currentLocation == null) {
-            mMapView.setMapCenterPoint(currentLocation, true);
-        }
         this.currentLocation = currentLocation;
         MapPoint.GeoCoordinate mapPointGeo = currentLocation.getMapPointGeoCoord();
         Log.i(LOG_TAG, String.format("MapView onCurrentLocationUpdate (%f,%f) accuracy (%f)", mapPointGeo.latitude, mapPointGeo.longitude, accuracyInMeters));
@@ -235,7 +252,6 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
                 this,
                 this);
         reverseGeoCoder.startFindingAddress();
-        progressBar.setVisibility(View.VISIBLE);
     }
 
     /*
@@ -244,8 +260,16 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
     @Override
     public void onReverseGeoCoderFoundAddress(MapReverseGeoCoder mapReverseGeoCoder, String s) {
-        // TODO - 동일한 읍면동이면 요청 보내지 않도록 개선
-        getHospitalList(deptCode, parseEMDongNm(s));
+        // 동일한 읍면동이면 API 요청을 보내지 않도록 개선
+        String newEMDong = parseEMDongNm(s);
+        if (centerEMDong.equals(newEMDong)) {
+            hideLoadingView();
+            onFinishReverseGeoCoding(s);
+            return;
+        }
+
+        centerEMDong = newEMDong;
+        getHospitalList(deptCode, centerEMDong);
         onFinishReverseGeoCoding(s);
     }
 
@@ -269,11 +293,11 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
     private void onFinishReverseGeoCoding(String result) {
         System.out.println("Reverse Geo-coding : " + result);
-//        Toast.makeText(LocationDemoActivity.this, "Reverse Geo-coding : " + result, Toast.LENGTH_SHORT).show();
     }
 
     public void getHospitalList(DepartmentCode deptCode, String emdongNm) {
-        // TODO - Request Cancle 처리 고민해보기
+        showLoadingView();
+
         RequestQueue requestQueue;
         Cache cache = new DiskBasedCache(getCacheDir(), 1024 * 1024);
         Network network = new BasicNetwork(new HurlStack());
@@ -293,10 +317,10 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
                     public void onResponse(String response) {
                         // 응답
                         System.out.println("응답 : " + response);     // for Debug
-                        progressBar.setVisibility(View.INVISIBLE);
+                        hideLoadingView();
                         JSONParse(response);
 
-                        // TODO - 지도에 마킹하기
+                        // 지도에 마킹
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -321,7 +345,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
                     public void onErrorResponse(VolleyError error) {
                         // 에러 처리
                         error.printStackTrace();
-                        progressBar.setVisibility(View.INVISIBLE);
+                        hideLoadingView();
                     }
                 }){
             @Override //response를 UTF8로 변경해주는 소스코드
@@ -343,7 +367,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
             }
         };
 
-        int socketTimeout = 10000;  //10 seconds - change to what you want
+        int socketTimeout = 10000;  //10 seconds
         RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
         stringRequest.setRetryPolicy(policy);
         requestQueue.add(stringRequest);
@@ -526,8 +550,6 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
 
     }
 
-
-
     //여기부터는 GPS 활성화를 위한 메소드들
     private void showDialogForLocationServiceSetting() {
 
@@ -552,8 +574,7 @@ public class MainActivity extends AppCompatActivity implements MapView.CurrentLo
         });
         builder.create().show();
     }
-
-
+    
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
