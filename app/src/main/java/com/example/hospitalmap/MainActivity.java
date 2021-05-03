@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -66,6 +67,7 @@ public class MainActivity extends AppCompatActivity
     private LinearLayout choiceView;
     private TextView deptTextView;
     private ImageButton currentLocationBtn;
+    private Button showListBtn;
     private View loadingView;
 
     private MapPoint currentLocation;
@@ -95,16 +97,29 @@ public class MainActivity extends AppCompatActivity
         choiceView = findViewById(R.id.choice_dept_view);
         deptTextView = findViewById(R.id.dept_textview);
         currentLocationBtn = findViewById(R.id.current_location_btn);
+        showListBtn = findViewById(R.id.show_list_btn);
         loadingView = findViewById(R.id.loading_view);
 
         sharedPreferences = getSharedPreferences(getResources().getString(R.string.shared_preferences_file_name), MODE_PRIVATE);
         deptCode = DepartmentCode.valueOf(sharedPreferences.getString(getResources().getString(R.string.sp_stored_department), "IM"));
         deptTextView.setText(deptCode.getDepartmentName());
         hideLoadingView();
+        showListBtn.setClickable(false);
 
         // TODO - 실 기기 연결 후 삭제
 //        currentLocation = MapPoint.mapPointWithGeoCoord(37.507156, 127.058338);
         centerEMDong = "대치동";
+        getHospitalList(deptCode, centerEMDong);
+        showListBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 목록 화면으로 이동
+                Intent intent = new Intent(getApplicationContext(), ListActivity.class);
+                intent.putExtra("hospitalItemList", hospitalItemList);
+                intent.putExtra("deptName", deptCode.getDepartmentName());
+                startActivity(intent);
+            }
+        });
 
 //        if (!checkLocationServicesStatus()) {
 //            showDialogForLocationServiceSetting();
@@ -296,6 +311,7 @@ public class MainActivity extends AppCompatActivity
 
     public void getHospitalList(DepartmentCode deptCode, String emdongNm) {
         showLoadingView();
+        showListBtn.setClickable(false);
 
         RequestQueue requestQueue;
         Cache cache = new DiskBasedCache(getCacheDir(), 1024 * 1024);
@@ -318,6 +334,7 @@ public class MainActivity extends AppCompatActivity
                         System.out.println("응답 : " + response);     // for Debug
                         hideLoadingView();
                         JSONParse(response);
+                        showListBtn.setClickable(true);
 
                         // 지도에 마킹
 //                        runOnUiThread(new Runnable() {
