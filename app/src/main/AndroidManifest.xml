@@ -11,15 +11,18 @@
         android:label="@string/app_name"
         android:roundIcon="@drawable/appicon"
         android:supportsRtl="true"
-        android:theme="@style/Theme.HospitalMap">
+        android:theme="@style/Theme.HospitalMap"
+        android:usesCleartextTraffic="true" >
+        <activity android:name=".DataActivity">
+        </activity>
         <activity android:name=".SplashActivity">
+        </activity>
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity android:name=".MainActivity">
         </activity>
         <meta-data android:name="com.kakao.sdk.AppKey" android:value="2cd6ba925187026280a21dcabaf3e34a"/>
     </application>

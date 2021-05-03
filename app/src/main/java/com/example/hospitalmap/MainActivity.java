@@ -83,14 +83,14 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Intent intent = getIntent();
-        Double latitude = intent.getDoubleExtra("latitude", 0);
-        Double longitude = intent.getDoubleExtra("longitude", 0);
-
-        mMapView = (MapView) findViewById(R.id.map_view);
-        mMapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(latitude, longitude), false);
-        mMapView.setCurrentLocationEventListener(this);
-        mMapView.setMapViewEventListener(this);
+//        Intent intent = getIntent();
+//        Double latitude = intent.getDoubleExtra("latitude", 0);
+//        Double longitude = intent.getDoubleExtra("longitude", 0);
+//
+//        mMapView = (MapView) findViewById(R.id.map_view);
+//        mMapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(latitude, longitude), false);
+//        mMapView.setCurrentLocationEventListener(this);
+//        mMapView.setMapViewEventListener(this);
 
         choiceView = findViewById(R.id.choice_dept_view);
         deptTextView = findViewById(R.id.dept_textview);
@@ -102,11 +102,15 @@ public class MainActivity extends AppCompatActivity
         deptTextView.setText(deptCode.getDepartmentName());
         hideLoadingView();
 
-        if (!checkLocationServicesStatus()) {
-            showDialogForLocationServiceSetting();
-        } else {
-            checkRunTimePermission();
-        }
+        // TODO - 실 기기 연결 후 삭제
+//        currentLocation = MapPoint.mapPointWithGeoCoord(37.507156, 127.058338);
+        centerEMDong = "대치동";
+
+//        if (!checkLocationServicesStatus()) {
+//            showDialogForLocationServiceSetting();
+//        } else {
+//            checkRunTimePermission();
+//        }
 
         choiceView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,39 +123,34 @@ public class MainActivity extends AppCompatActivity
                 final String[] deptArr = deptNameArray.toArray(new String[deptNameArray.size()]);
 
                 AlertDialog.Builder dlg = new AlertDialog.Builder(MainActivity.this);
-                dlg.setTitle("진료과목 선택");
+                dlg.setTitle("진료과");
                 dlg.setItems(deptArr, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         deptCode = deptCodeArray[which];
                         deptTextView.setText(deptCode.getDepartmentName());
-                        MapReverseGeoCoder reverseGeoCoder = new MapReverseGeoCoder(getResources().getString(R.string.rest_api_key),
-                                mMapView.getMapCenterPoint(),
-                                MainActivity.this,
-                                MainActivity.this);
-                        reverseGeoCoder.startFindingAddress();
-
-                        showLoadingView();
+                        getHospitalList(deptCode, centerEMDong);
                         dialog.dismiss();
                     }
                 });
+                dlg.setPositiveButton("닫기", null);
                 dlg.show();
             }
         });
 
-        currentLocationBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (currentLocation != null) {
-                    mMapView.setMapCenterPoint(currentLocation, true);
-                }
-            }
-        });
+//        currentLocationBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (currentLocation != null) {
+//                    mMapView.setMapCenterPoint(currentLocation, true);
+//                }
+//            }
+//        });
 
         loadingView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                // Do Nothing - disable user interaction
             }
         });
     }
@@ -321,23 +320,23 @@ public class MainActivity extends AppCompatActivity
                         JSONParse(response);
 
                         // 지도에 마킹
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mMapView.removeAllPOIItems();
-                                for (int i=0; i < hospitalItemList.size(); i++) {
-                                    HospitalItem hospItem = hospitalItemList.get(i);
-                                    MapPOIItem marker = new MapPOIItem();
-                                    marker.setTag(i);
-                                    marker.setItemName(hospItem.getHospName());
-                                    MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(hospItem.getYPos(), hospItem.getXPos());
-                                    marker.setMapPoint(mapPoint);
-                                    marker.setMarkerType(MapPOIItem.MarkerType.BluePin);
-                                    marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin);
-                                    mMapView.addPOIItem(marker);
-                                }
-                            }
-                        });
+//                        runOnUiThread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                mMapView.removeAllPOIItems();
+//                                for (int i=0; i < hospitalItemList.size(); i++) {
+//                                    HospitalItem hospItem = hospitalItemList.get(i);
+//                                    MapPOIItem marker = new MapPOIItem();
+//                                    marker.setTag(i);
+//                                    marker.setItemName(hospItem.getHospName());
+//                                    MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(hospItem.getYPos(), hospItem.getXPos());
+//                                    marker.setMapPoint(mapPoint);
+//                                    marker.setMarkerType(MapPOIItem.MarkerType.BluePin);
+//                                    marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin);
+//                                    mMapView.addPOIItem(marker);
+//                                }
+//                            }
+//                        });
                     }
                 },
                 new Response.ErrorListener() {
@@ -574,7 +573,7 @@ public class MainActivity extends AppCompatActivity
         });
         builder.create().show();
     }
-    
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
