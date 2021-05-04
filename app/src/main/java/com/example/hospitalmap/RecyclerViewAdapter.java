@@ -1,6 +1,7 @@
 package com.example.hospitalmap;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,9 +36,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 public void onClick(View view) {
                     int pos = getAdapterPosition();
                     if (pos != RecyclerView.NO_POSITION) {
-//                        Intent intent = new Intent(activity, DetailActivity.class);
-//                        intent.putExtra("selectedObject", recyclerViewItemList.get(pos));
-//                        activity.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP));
+                        Intent intent = new Intent(activity, DetailActivity.class);
+                        intent.putExtra("hospitalItem", hospitalItemList.get(pos));
+                        activity.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP));
                     }
                 }
             });
@@ -65,7 +66,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public RecyclerViewAdapter(Activity a, ArrayList<HospitalItem> hospitalItemList) {
         activity = a;
         this.hospitalItemList = hospitalItemList;
-        System.out.println(hospitalItemList.size());
     }
 
     @NonNull

@@ -26,6 +26,8 @@
         </activity>
         <activity android:name=".ListActivity">
         </activity>
+        <activity android:name=".DetailActivity">
+        </activity>
         <meta-data android:name="com.kakao.sdk.AppKey" android:value="2cd6ba925187026280a21dcabaf3e34a"/>
     </application>
 
