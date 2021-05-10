@@ -6,6 +6,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Paint;
 import android.location.LocationManager;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -15,11 +18,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -57,10 +58,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+
 public class MainActivity extends AppCompatActivity
         implements MapView.CurrentLocationEventListener,
         MapReverseGeoCoder.ReverseGeoCodingResultListener,
-        MapView.MapViewEventListener {
+        MapView.MapViewEventListener,
+        MapView.POIItemEventListener {
     private static final String LOG_TAG = "MainActivity";
 
     private MapView mMapView;
@@ -75,6 +82,9 @@ public class MainActivity extends AppCompatActivity
     private DepartmentCode deptCode;
     private SharedPreferences sharedPreferences;
     private ArrayList<HospitalItem> hospitalItemList;
+    private Disposable backgroundtask;
+
+    private SQLiteDatabase db;
 
     private static final int GPS_ENABLE_REQUEST_CODE = 2001;
     private static final int PERMISSIONS_REQUEST_CODE = 100;
@@ -85,31 +95,35 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        Intent intent = getIntent();
-//        Double latitude = intent.getDoubleExtra("latitude", 0);
-//        Double longitude = intent.getDoubleExtra("longitude", 0);
-//
-//        mMapView = (MapView) findViewById(R.id.map_view);
-//        mMapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(latitude, longitude), false);
-//        mMapView.setCurrentLocationEventListener(this);
-//        mMapView.setMapViewEventListener(this);
+        Intent intent = getIntent();
+        Double latitude = intent.getDoubleExtra("latitude", 0);
+        Double longitude = intent.getDoubleExtra("longitude", 0);
+
+        mMapView = (MapView) findViewById(R.id.map_view);
+        mMapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(latitude, longitude), false);
+        mMapView.setCurrentLocationEventListener(this);
+        mMapView.setMapViewEventListener(this);
+        mMapView.setPOIItemEventListener(this);
+        mMapView.setZoomLevel(3,true);
 
         choiceView = findViewById(R.id.choice_dept_view);
         deptTextView = findViewById(R.id.dept_textview);
         currentLocationBtn = findViewById(R.id.current_location_btn);
         showListBtn = findViewById(R.id.show_list_btn);
+        infoView = findViewById(R.id.info_view);
         loadingView = findViewById(R.id.loading_view);
+
+        DBHelper helper = new DBHelper(MainActivity.this, "hdb.db", null, 1);
+        db = helper.getWritableDatabase();
+        helper.onCreate(db);
 
         sharedPreferences = getSharedPreferences(getResources().getString(R.string.shared_preferences_file_name), MODE_PRIVATE);
         deptCode = DepartmentCode.valueOf(sharedPreferences.getString(getResources().getString(R.string.sp_stored_department), "IM"));
         deptTextView.setText(deptCode.getDepartmentName());
         hideLoadingView();
         showListBtn.setClickable(false);
+        infoView.setVisibility(View.INVISIBLE);
 
-        // TODO - 실 기기 연결 후 삭제
-//        currentLocation = MapPoint.mapPointWithGeoCoord(37.507156, 127.058338);
-        centerEMDong = "대치동";
-        getHospitalList(deptCode, centerEMDong);
         showListBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -121,11 +135,11 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-//        if (!checkLocationServicesStatus()) {
-//            showDialogForLocationServiceSetting();
-//        } else {
-//            checkRunTimePermission();
-//        }
+        if (!checkLocationServicesStatus()) {
+            showDialogForLocationServiceSetting();
+        } else {
+            checkRunTimePermission();
+        }
 
         choiceView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -144,7 +158,8 @@ public class MainActivity extends AppCompatActivity
                     public void onClick(DialogInterface dialog, int which) {
                         deptCode = deptCodeArray[which];
                         deptTextView.setText(deptCode.getDepartmentName());
-                        getHospitalList(deptCode, centerEMDong);
+//                        getHospitalList(deptCode, centerEMDong);
+                        getHospitalListFromDB(deptCode, centerEMDong);
                         dialog.dismiss();
                     }
                 });
@@ -153,14 +168,14 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-//        currentLocationBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if (currentLocation != null) {
-//                    mMapView.setMapCenterPoint(currentLocation, true);
-//                }
-//            }
-//        });
+        currentLocationBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (currentLocation != null) {
+                    mMapView.setMapCenterPoint(currentLocation, true);
+                }
+            }
+        });
 
         loadingView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -283,7 +298,8 @@ public class MainActivity extends AppCompatActivity
         }
 
         centerEMDong = newEMDong;
-        getHospitalList(deptCode, centerEMDong);
+//        getHospitalList(deptCode, centerEMDong);
+        getHospitalListFromDB(deptCode, centerEMDong);
         onFinishReverseGeoCoding(s);
     }
 
@@ -307,6 +323,94 @@ public class MainActivity extends AppCompatActivity
 
     private void onFinishReverseGeoCoding(String result) {
         System.out.println("Reverse Geo-coding : " + result);
+    }
+
+    public void getHospitalListFromDB(DepartmentCode deptCode, String emdongNm) {
+        showLoadingView();
+        //onPreExecute
+        hospitalItemList = new ArrayList<HospitalItem>();
+        
+        backgroundtask = Observable.fromCallable(() -> {
+            //doInBackground
+            String mQuery = "SELECT * FROM tb_hospbasislist a INNER JOIN tb_dgsbjt b ON a.ykiho = b.ykiho WHERE b.dgsbjtCd = ? AND a.addr LIKE ?";
+            Cursor c = db.rawQuery(mQuery, new String[]{deptCode.getCode(), "%" + emdongNm + "%"});
+
+            while (c.moveToNext()) {
+                String hospName = c.getString(c.getColumnIndex("yadmNm"));
+                String classCodeName = c.getString(c.getColumnIndex("clCdNm"));
+                String address = c.getString(c.getColumnIndex("addr"));
+                String telNo = c.getString(c.getColumnIndex("telno"));
+                String hospUrl = c.getString(c.getColumnIndex("hospUrl"));
+
+                Integer estbDate = c.getInt(c.getColumnIndex("estbDd"));
+                Integer doctorTotalCnt = c.getInt(c.getColumnIndex("drTotCnt"));
+                Integer specialistDoctorCnt = c.getInt(c.getColumnIndex("sdrCnt"));
+                Integer generalDoctorCnt = c.getInt(c.getColumnIndex("gdrCnt"));
+                Integer residentCnt = c.getInt(c.getColumnIndex("resdntCnt"));
+                Integer internCnt = c.getInt(c.getColumnIndex("intnCnt"));
+
+                Double xPos = c.getDouble(c.getColumnIndex("XPos"));
+                Double yPos = c.getDouble(c.getColumnIndex("YPos"));
+
+                String dgsbjtCdNm = c.getString(c.getColumnIndex("dgsbjtCdNm"));
+
+                // 새로운 HospitalItem 객체 생성
+                HospitalItem item = new HospitalItem();
+                item.setHospName(hospName);
+                item.setClassCodeName(classCodeName);
+                item.setDeptCodeName(dgsbjtCdNm);
+                item.setAddress(address);
+                if (!telNo.isEmpty()) {
+                    item.setTelNo(telNo);
+                }
+                if (!hospUrl.isEmpty()) {
+                    item.setHospUrl(hospUrl);
+                }
+                item.setEstbDate(convertDate(estbDate.toString()));
+
+                item.setDoctorTotalCnt(doctorTotalCnt);
+                item.setSpecialistDoctorCnt(specialistDoctorCnt);
+                item.setGeneralDoctorCnt(generalDoctorCnt);
+                item.setResidentCnt(residentCnt);
+                item.setInternCnt(internCnt);
+
+                item.setXPos(xPos);
+                item.setYPos(yPos);
+                hospitalItemList.add(item);
+            }
+            return false;
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((result) -> {
+
+                    //onPostExecute
+                    hideLoadingView();
+                    showListBtn.setClickable(true);
+
+                    // 지도에 마킹
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mMapView.removeAllPOIItems();
+                            for (int i=0; i < hospitalItemList.size(); i++) {
+                                HospitalItem hospItem = hospitalItemList.get(i);
+                                MapPOIItem marker = new MapPOIItem();
+                                marker.setTag(i);
+                                marker.setItemName(hospItem.getHospName());
+                                marker.setUserObject(hospItem);
+                                MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(hospItem.getYPos(), hospItem.getXPos());
+                                marker.setMapPoint(mapPoint);
+                                marker.setMarkerType(MapPOIItem.MarkerType.BluePin);
+                                marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin);
+                                marker.setShowDisclosureButtonOnCalloutBalloon(false);
+                                mMapView.addPOIItem(marker);
+                            }
+                        }
+                    });
+
+                    backgroundtask.dispose();
+                });
     }
 
     public void getHospitalList(DepartmentCode deptCode, String emdongNm) {
@@ -337,23 +441,24 @@ public class MainActivity extends AppCompatActivity
                         showListBtn.setClickable(true);
 
                         // 지도에 마킹
-//                        runOnUiThread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                mMapView.removeAllPOIItems();
-//                                for (int i=0; i < hospitalItemList.size(); i++) {
-//                                    HospitalItem hospItem = hospitalItemList.get(i);
-//                                    MapPOIItem marker = new MapPOIItem();
-//                                    marker.setTag(i);
-//                                    marker.setItemName(hospItem.getHospName());
-//                                    MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(hospItem.getYPos(), hospItem.getXPos());
-//                                    marker.setMapPoint(mapPoint);
-//                                    marker.setMarkerType(MapPOIItem.MarkerType.BluePin);
-//                                    marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin);
-//                                    mMapView.addPOIItem(marker);
-//                                }
-//                            }
-//                        });
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mMapView.removeAllPOIItems();
+                                for (int i=0; i < hospitalItemList.size(); i++) {
+                                    HospitalItem hospItem = hospitalItemList.get(i);
+                                    MapPOIItem marker = new MapPOIItem();
+                                    marker.setTag(i);
+                                    marker.setItemName(hospItem.getHospName());
+                                    marker.setUserObject(hospItem);
+                                    MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(hospItem.getYPos(), hospItem.getXPos());
+                                    marker.setMapPoint(mapPoint);
+                                    marker.setMarkerType(MapPOIItem.MarkerType.BluePin);
+                                    marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin);
+                                    mMapView.addPOIItem(marker);
+                                }
+                            }
+                        });
                     }
                 },
                 new Response.ErrorListener() {

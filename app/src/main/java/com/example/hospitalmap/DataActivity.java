@@ -44,10 +44,10 @@ import java.util.Date;
 import java.util.Map;
 
 public class DataActivity extends Activity {
-    private ArrayList<HospitalItem> hospitalItemList;
     SQLiteDatabase db;
 
     Integer pageNo;
+    Integer idIndex;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -59,21 +59,132 @@ public class DataActivity extends Activity {
         helper.onCreate(db);
 
         pageNo = 1;
+        idIndex = 1;
 
 //        getHospitalList();
         Button button = findViewById(R.id.button1);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                findDong("대치동");
+//                findDong("대치동");
+                getHospitalList2("01", "%대치동%");
             }
         });
     }
 
     public void findDong(String dong) {
-        Cursor c = db.query(true, "hospitaldb", null, "addr LIKE ?", new String[] {"%" + dong + "%"}, null, null, null, null, null);
+        Cursor c = db.query(true, "tb_hospbasislist", null, "addr LIKE ?", new String[] {"%" + dong + "%"}, null, null, null, null, null);
         while (c.moveToNext()) {
             System.out.println("결과 : " + c.getString(c.getColumnIndex("addr")));
+        }
+    }
+
+    public void insertSubject() {
+        Cursor c = db.rawQuery("SELECT * FROM tb_hospbasislist WHERE _id = ?", new String[] {idIndex.toString()});
+
+        while(c.moveToNext()) {
+            String ykiho = c.getString(c.getColumnIndex("ykiho"));
+            getMdlrtSbjectInfoList(ykiho);
+        }
+    }
+
+    private void getMdlrtSbjectInfoList(String ykiho) {
+        RequestQueue requestQueue;
+        Cache cache = new DiskBasedCache(getCacheDir(), 1024 * 1024);
+        Network network = new BasicNetwork(new HurlStack());
+        requestQueue = new RequestQueue(cache, network);
+        requestQueue.start();
+
+        Integer numOfRows = 100;
+
+        String url = "\thttp://apis.data.go.kr/B551182/medicInsttDetailInfoService/getMdlrtSbjectInfoList?pageNo=1&numOfRows=50"
+                + "&ykiho=" + ykiho
+                + "&ServiceKey=Q%2BbQw%2FUNPpDxP9hAGr3SQzR71t%2BCRCoDcFtPYmxVpEdlObYNjUINxMD3hurNngT3r19ae%2FDHw7t%2B5YhzIm2EuA%3D%3D&_type=json";
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // 응답
+                        System.out.println("진료과 응답 : " + response);     // for Debug
+                        JSONParse2(response, ykiho);
+                        System.out.println("완료완료 " + idIndex);
+
+                        idIndex++;
+
+                        if(idIndex == 71319) {
+                            return;
+                        }
+                        insertSubject();
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // 에러 처리
+                        error.printStackTrace();
+                    }
+                }){
+            @Override //response를 UTF8로 변경해주는 소스코드
+            protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                try {
+                    String utf8String = new String(response.data, "UTF-8");
+                    return Response.success(utf8String, HttpHeaderParser.parseCacheHeaders(response));
+                } catch (UnsupportedEncodingException e) {
+                    // log error
+                    return Response.error(new ParseError(e));
+                } catch (Exception e) {
+                    // log error
+                    return Response.error(new ParseError(e));
+                }
+            }
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                return super.getParams();
+            }
+        };
+
+        int socketTimeout = 10000;  //10 seconds
+        RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        stringRequest.setRetryPolicy(policy);
+        requestQueue.add(stringRequest);
+    }
+
+    private void JSONParse2(String jsonStr, String ykiho) {
+        try {
+            JSONObject bodyObject = new JSONObject(jsonStr).getJSONObject("response").getJSONObject("body");
+            Object response = bodyObject.get("items");
+            if (response instanceof String) {
+                Toast.makeText(getApplicationContext(), "일치하는 결과가 없습니다.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            JSONObject resObject = (JSONObject) response;
+            JSONArray jsonArray;
+            if (resObject.get("item") instanceof JSONArray) {
+                jsonArray = resObject.getJSONArray("item");
+            } else {
+                jsonArray = new JSONArray();
+                jsonArray.put(resObject.getJSONObject("item"));
+            }
+
+            for (int i=0; i < jsonArray.length(); i++) {
+                // 각 아이템에서 데이터 추출
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                Integer cdiagDrCnt = jsonObject.getInt("cdiagDrCnt");
+                String dgsbjtCd = jsonObject.getString("dgsbjtCd");
+                String dgsbjtCdNm = jsonObject.getString("dgsbjtCdNm");
+                Integer dgsbjtPrSdrCnt = jsonObject.getInt("dgsbjtPrSdrCnt");
+
+                ContentValues values = new ContentValues();
+                values.put("ykiho", ykiho);
+                values.put("cdiagDrCnt", cdiagDrCnt);
+                values.put("dgsbjtCd", dgsbjtCd);
+                values.put("dgsbjtCdNm", dgsbjtCdNm);
+                values.put("dgsbjtPrSdrCnt", dgsbjtPrSdrCnt);
+                db.insert("tb_dgsbjt", null, values);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 
@@ -102,6 +213,7 @@ public class DataActivity extends Activity {
                         pageNo++;
 
                         if(pageNo == 150) {
+                            insertSubject();
                             return;
                         }
                         getHospitalList();
@@ -139,8 +251,16 @@ public class DataActivity extends Activity {
         requestQueue.add(stringRequest);
     }
 
+    public void getHospitalList2(String dgsbjtCd, String dongNm) {
+        String mQuery = "SELECT * FROM tb_hospbasislist a INNER JOIN tb_dgsbjt b ON a.ykiho = b.ykiho WHERE b.dgsbjtCd = ? AND a.addr LIKE ?";
+        Cursor c = db.rawQuery(mQuery, new String[]{dgsbjtCd, dongNm});
+        while (c.moveToNext()) {
+            System.out.println("병원 이름 : " + c.getString(c.getColumnIndex("yadmNm")));
+            System.out.println("병원 이름 : " + c.getDouble(c.getColumnIndex("XPos")));
+        }
+    }
+
     private void JSONParse(String jsonStr) {
-        hospitalItemList = new ArrayList<HospitalItem>();
         try {
             JSONObject bodyObject = new JSONObject(jsonStr).getJSONObject("response").getJSONObject("body");
             Object response = bodyObject.get("items");
@@ -206,7 +326,6 @@ public class DataActivity extends Activity {
 
                 item.setXPos(xPos);
                 item.setYPos(yPos);
-                hospitalItemList.add(item);
 
                 ContentValues values = new ContentValues();
                 values.put("addr", address);

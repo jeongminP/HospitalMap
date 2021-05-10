@@ -11,7 +11,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String sql = "CREATE TABLE if not exists hospitaldb ("
+        String sql = "CREATE TABLE if not exists tb_hospbasislist ("
                 + "_id integer primary key autoincrement,"
                 + "addr text,"
                 + "clCdNm text,"
@@ -27,6 +27,15 @@ public class DBHelper extends SQLiteOpenHelper {
                 + "YPos double,"
                 + "yadmNm text);";
         db.execSQL(sql);
+
+        String sql_dgsbjt = "CREATE TABLE if not exists tb_dgsbjt ("
+                + "_id integer primary key autoincrement,"
+                + "ykiho text,"
+                + "dgsbjtCd text,"
+                + "dgsbjtCdNm text,"
+                + "dgsbjtPrSdrCnt integer,"
+                + "cdiagDrCnt integer);";
+        db.execSQL(sql_dgsbjt);
     }
 
     @Override
