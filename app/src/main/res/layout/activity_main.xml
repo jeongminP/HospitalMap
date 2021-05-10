@@ -7,9 +7,8 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <View
+    <net.daum.mf.map.api.MapView
         android:id="@+id/map_view"
-        android:background="#00ff00"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
@@ -65,16 +64,76 @@
         android:tint="#0000ff"
         android:src="@drawable/current_location_icon" />
 
+    <LinearLayout
+        android:id="@+id/info_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginBottom="10dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="15dp"
+        android:background="@drawable/background_basic_radius"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/hosp_name_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="15dp"
+            android:text="병원 이름"
+            android:textColor="#000000"
+            android:textStyle="bold"
+            android:textSize="20dp" />
+        <TextView
+            android:id="@+id/class_code_name_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="15dp"
+            android:layout_marginTop="5dp"
+            android:text="종별코드명"
+            android:textColor="#8c8c8c"
+            android:textSize="13dp" />
+        <TextView
+            android:id="@+id/address_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="15dp"
+            android:layout_marginTop="15dp"
+            android:text="주소"
+            android:textColor="#000000"
+            android:textSize="13dp" />
+        <TextView
+            android:id="@+id/tel_no_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="15dp"
+            android:text="000-0000-0000"
+            android:textColor="#ff0000" />
+        <TextView
+            android:id="@+id/hosp_url_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="15dp"
+            android:text="홈페이지 주소"
+            android:textColor="#0000ff" />
+
+    </LinearLayout>
+
     <RelativeLayout
         android:id="@+id/loading_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#4D000000" >
 
-        <ProgressBar
-            android:id="@+id/wating_progress_bar"
+        <com.github.ybq.android.spinkit.SpinKitView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/spin_kit"
+            style="@style/SpinKitView.FadingCircle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            app:SpinKit_Color="#ffffff"
             android:layout_centerInParent="true"/>
 
     </RelativeLayout>

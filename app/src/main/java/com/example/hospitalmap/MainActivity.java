@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity
     private TextView deptTextView;
     private ImageButton currentLocationBtn;
     private Button showListBtn;
+    private View infoView;
     private View loadingView;
 
     private MapPoint currentLocation;
@@ -250,7 +251,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onMapViewSingleTapped(MapView mapView, MapPoint mapPoint) {
-
+        infoView.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -266,6 +267,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onMapViewDragStarted(MapView mapView, MapPoint mapPoint) {
         System.out.println("지도 움직이기 시작!!");
+        infoView.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -281,6 +283,66 @@ public class MainActivity extends AppCompatActivity
                 this,
                 this);
         reverseGeoCoder.startFindingAddress();
+    }
+
+    /*
+        MapView.POIItemEventListener 구현
+     */
+
+    @Override
+    public void onPOIItemSelected(MapView mapView, MapPOIItem mapPOIItem) {
+        TextView tvName = findViewById(R.id.hosp_name_textview);
+        TextView tvClCdNm = findViewById(R.id.class_code_name_textview);
+        TextView tvAddr = findViewById(R.id.address_textview);
+        TextView tvTelNo = findViewById(R.id.tel_no_textview);
+        TextView tvUrl = findViewById(R.id.hosp_url_textview);
+
+        HospitalItem selectedItem = (HospitalItem) mapPOIItem.getUserObject();
+
+        tvName.setText(selectedItem.getHospName());
+        tvClCdNm.setText(selectedItem.getClassCodeName());
+        tvAddr.setText(selectedItem.getAddress());
+
+        String telno = selectedItem.getTelNo();
+        if (telno==null || telno.isEmpty()) {
+            tvTelNo.setVisibility(View.GONE);
+        } else {
+            tvTelNo.setText(telno);
+        }
+
+        String url = selectedItem.getHospUrl();
+        if (url==null || url.isEmpty()) {
+            tvUrl.setVisibility(View.GONE);
+        } else {
+            tvUrl.setPaintFlags(tvUrl.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+            tvUrl.setText(url);
+        }
+
+        infoView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), DetailActivity.class);
+                intent.putExtra("hospitalItem", selectedItem);
+                startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP));
+            }
+        });
+
+        infoView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem) {
+
+    }
+
+    @Override
+    public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem, MapPOIItem.CalloutBalloonButtonType calloutBalloonButtonType) {
+
+    }
+
+    @Override
+    public void onDraggablePOIItemMoved(MapView mapView, MapPOIItem mapPOIItem, MapPoint mapPoint) {
+
     }
 
     /*
