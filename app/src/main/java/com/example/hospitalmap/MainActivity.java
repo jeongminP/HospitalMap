@@ -131,6 +131,7 @@ public class MainActivity extends AppCompatActivity
                 // 목록 화면으로 이동
                 Intent intent = new Intent(getApplicationContext(), ListActivity.class);
                 intent.putExtra("hospitalItemList", hospitalItemList);
+                intent.putExtra("emdongName", centerEMDong);
                 intent.putExtra("deptName", deptCode.getDepartmentName());
                 startActivity(intent);
             }
@@ -448,6 +449,7 @@ public class MainActivity extends AppCompatActivity
 
                     //onPostExecute
                     hideLoadingView();
+                    showListBtn.setText(getResources().getString(R.string.button_text_show_hosp_list) + " (" + hospitalItemList.size() + ")");
                     showListBtn.setClickable(true);
 
                     // 지도에 마킹

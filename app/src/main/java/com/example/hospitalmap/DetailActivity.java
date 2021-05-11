@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -38,6 +39,17 @@ public class DetailActivity extends Activity {
         telNoView = findViewById(R.id.tel_no_view);
         hospUrlView = findViewById(R.id.hosp_url_view);
         estbDateView = findViewById(R.id.estb_date_view);
+
+        TextView titleTextView = findViewById(R.id.detail_title_textview);
+        titleTextView.setText(hospitalItem.getHospName());
+
+        ImageButton backBtn = findViewById(R.id.back_btn);
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         // 텍스트 채우기
         tvName.setText(hospitalItem.getHospName());

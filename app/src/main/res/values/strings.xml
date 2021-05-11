@@ -3,4 +3,5 @@
     <string name="rest_api_key">7d2feecc4ac3c347ea3accbc8ae653fc</string>
     <string name="shared_preferences_file_name">storedFile</string>
     <string name="sp_stored_department">stored_department</string>
+    <string name="button_text_show_hosp_list">병원 목록 보기</string>
 </resources>
