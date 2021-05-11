@@ -85,8 +85,9 @@ public class MainActivity extends AppCompatActivity
     private SharedPreferences sharedPreferences;
     private ArrayList<HospitalItem> hospitalItemList;
     private Disposable backgroundtask;
-
     private SQLiteDatabase db;
+
+    private long backBtnTime = 0;
 
     private static final int GPS_ENABLE_REQUEST_CODE = 2001;
     private static final int PERMISSIONS_REQUEST_CODE = 100;
@@ -199,6 +200,20 @@ public class MainActivity extends AppCompatActivity
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(getResources().getString(R.string.sp_stored_department), deptCode.toString());
         editor.apply();
+    }
+
+    @Override
+    public void onBackPressed() {
+        long curTime = System.currentTimeMillis();
+        long gapTime = curTime - backBtnTime;
+
+        if(0 <= gapTime && 2000 >= gapTime) {
+            super.onBackPressed();
+        }
+        else {
+            backBtnTime = curTime;
+            Toast.makeText(this, "한번 더 누르면 종료됩니다.",Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showLoadingView() {
