@@ -3,6 +3,7 @@ package com.example.hospitalmap;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Paint;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
@@ -61,6 +62,14 @@ public class DetailActivity extends Activity {
             telNoView.setVisibility(View.GONE);
         } else {
             tvTelNo.setText(telno);
+            tvTelNo.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Uri uri = Uri.parse("tel:" + telno);
+                    Intent intent = new Intent(Intent.ACTION_DIAL, uri);
+                    startActivity(intent);
+                }
+            });
         }
 
         String url = hospitalItem.getHospUrl();
@@ -69,6 +78,14 @@ public class DetailActivity extends Activity {
         } else {
             tvUrl.setPaintFlags(tvUrl.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
             tvUrl.setText(url);
+            tvUrl.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Uri uri = Uri.parse(url);
+                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    startActivity(intent);
+                }
+            });
         }
 
         String date = hospitalItem.getEstbDate();

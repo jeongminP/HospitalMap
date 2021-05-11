@@ -3,6 +3,7 @@ package com.example.hospitalmap;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Paint;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -88,15 +89,33 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         if (telno==null || telno.isEmpty()) {
             holder.getTvTelNo().setVisibility(View.GONE);
         } else {
+            holder.getTvTelNo().setVisibility(View.VISIBLE);
             holder.getTvTelNo().setText(telno);
+            holder.getTvTelNo().setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Uri uri = Uri.parse("tel:" + telno);
+                    Intent intent = new Intent(Intent.ACTION_DIAL, uri);
+                    activity.startActivity(intent);
+                }
+            });
         }
 
         String url = item.getHospUrl();
         if (url==null || url.isEmpty()) {
             holder.getTvUrl().setVisibility(View.GONE);
         } else {
+            holder.getTvUrl().setVisibility(View.VISIBLE);
             holder.getTvUrl().setPaintFlags(holder.getTvUrl().getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
             holder.getTvUrl().setText(url);
+            holder.getTvUrl().setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Uri uri = Uri.parse(url);
+                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    activity.startActivity(intent);
+                }
+            });
         }
     }
 

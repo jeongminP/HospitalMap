@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Paint;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -146,6 +147,8 @@ public class MainActivity extends AppCompatActivity
         choiceView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                infoView.setVisibility(View.INVISIBLE);
+
                 final DepartmentCode[] deptCodeArray = DepartmentCode.values();
                 ArrayList<String> deptNameArray = new ArrayList<String>();
                 for (DepartmentCode deptCode: DepartmentCode.values()) {
@@ -308,15 +311,35 @@ public class MainActivity extends AppCompatActivity
         if (telno==null || telno.isEmpty()) {
             tvTelNo.setVisibility(View.GONE);
         } else {
+            tvTelNo.setVisibility(View.VISIBLE);
             tvTelNo.setText(telno);
+
+            tvTelNo.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Uri uri = Uri.parse("tel:" + telno);
+                    Intent intent = new Intent(Intent.ACTION_DIAL, uri);
+                    startActivity(intent);
+                }
+            });
         }
 
         String url = selectedItem.getHospUrl();
         if (url==null || url.isEmpty()) {
             tvUrl.setVisibility(View.GONE);
         } else {
+            tvUrl.setVisibility(View.VISIBLE);
             tvUrl.setPaintFlags(tvUrl.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
             tvUrl.setText(url);
+
+            tvUrl.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Uri uri = Uri.parse(url);
+                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    startActivity(intent);
+                }
+            });
         }
 
         infoView.setOnClickListener(new View.OnClickListener() {
