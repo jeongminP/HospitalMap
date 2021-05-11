@@ -3,9 +3,12 @@ package com.example.hospitalmap;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
+import android.database.Cursor;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.LocationManager;
@@ -18,14 +21,28 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import net.daum.mf.map.api.MapPOIItem;
+import net.daum.mf.map.api.MapPoint;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+
 public class SplashActivity extends Activity {
     private GpsTracker gpsTracker;
+    private Disposable backgroundtask;
 
     private static final int GPS_ENABLE_REQUEST_CODE = 2001;
     private static final int PERMISSIONS_REQUEST_CODE = 100;
@@ -36,13 +53,93 @@ public class SplashActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
+        try {
+            boolean bResult = isCheckDB(this);
+            if(!bResult) {
+                copyDB(this);
+            } else {
+                System.out.println("카피 안함~~");
+                checkPermission();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private boolean isCheckDB(Context mContext) {
+        String filePath = "/data/data/" + getPackageName() + "/databases/" + "hdb.db";
+        File file = new File(filePath);
+
+        if(file.exists()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private void copyDB(Context mContext) {
+
+        backgroundtask = Observable.fromCallable(() -> {
+            //doInBackground
+            AssetManager manager = mContext.getAssets();
+            String folderPath = "/data/data/" + getPackageName() + "/databases";
+            String filePath = folderPath + "/hdb.db";
+            File folder = new File(folderPath);
+            File file = new File(filePath);
+
+            FileOutputStream fos = null;
+            BufferedOutputStream bos = null;
+            try {
+                InputStream is = manager.open("db/hdb.db");
+                BufferedInputStream bis = new BufferedInputStream(is);
+
+                if (folder.exists()) {
+                }else {
+                    folder.mkdirs();
+                }
+
+                if (file.exists()) {
+                    file.delete();
+                    file.createNewFile();
+                }
+
+                fos = new FileOutputStream(file);
+                bos = new BufferedOutputStream(fos);
+                int read = -1;
+                byte[] buffer = new byte[1024];
+                while ((read = bis.read(buffer, 0, 1024)) != -1) {
+                    bos.write(buffer, 0, read);
+                }
+
+                bos.flush();
+                bos.close();
+                fos.close();
+                bis.close();
+                is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return false;
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((result) -> {
+
+                    //onPostExecute
+                    checkPermission();
+
+                    backgroundtask.dispose();
+                });
+    }
+
+    private void checkPermission() {
         if (!checkLocationServicesStatus()) {
             showDialogForLocationServiceSetting();
         } else {
             checkRunTimePermission();
         }
-
-
     }
 
     private void startMain() {
