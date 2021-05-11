@@ -3,14 +3,17 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_marginHorizontal="10dp"
+    android:layout_marginVertical="5dp"
+    android:paddingHorizontal="15dp"
+    android:paddingVertical="10dp"
+    android:orientation="vertical"
+    android:background="#ffffff" >
 
     <TextView
         android:id="@+id/hosp_name_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="15dp"
-        android:layout_marginTop="10dp"
         android:text="병원 이름"
         android:textColor="#000000"
         android:textStyle="bold"
@@ -19,7 +22,6 @@
         android:id="@+id/class_code_name_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="15dp"
         android:layout_marginTop="5dp"
         android:text="종별코드명"
         android:textColor="#8c8c8c"
@@ -28,7 +30,6 @@
         android:id="@+id/address_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="15dp"
         android:layout_marginTop="15dp"
         android:text="주소"
         android:textColor="#000000"
@@ -37,21 +38,13 @@
         android:id="@+id/tel_no_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="15dp"
         android:text="000-0000-0000"
         android:textColor="#ff0000" />
     <TextView
         android:id="@+id/hosp_url_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="15dp"
         android:text="주소"
         android:textColor="#0000ff" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:layout_marginTop="15dp"
-        android:background="#909090" />
 
 </LinearLayout>
