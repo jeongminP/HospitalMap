@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/sky_blue">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -28,179 +29,286 @@
 
     </RelativeLayout>
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
-        android:background="@color/sky_blue"
-        android:padding="30dp"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <TextView
-            android:id="@+id/hosp_name_textview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="병원 이름"
-            android:textColor="#000000"
-            android:textStyle="bold"
-            android:textSize="20dp" />
-        <TextView
-            android:id="@+id/class_code_name_textview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="5dp"
-            android:text="종별코드명"
-            android:textColor="#8c8c8c"
-            android:textSize="13dp" />
-        <TextView
-            android:id="@+id/address_textview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="15dp"
-            android:text="주소"
-            android:textColor="#000000"
-            android:textSize="13dp" />
+        android:layout_height="match_parent" >
         <LinearLayout
-            android:id="@+id/tel_no_view"
+            android:orientation="vertical"
+            android:padding="30dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="15dp"
-            android:orientation="vertical">
+            android:layout_height="match_parent">
             <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="전화번호"
-                android:textStyle="bold"
-                android:textColor="#000000" />
-            <TextView
-                android:id="@+id/tel_no_textview"
+                android:id="@+id/hosp_name_textview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="000-0000-0000"
-                android:textColor="#ff0000" />
-        </LinearLayout>
+                android:layout_marginTop="10dp"
+                android:text="병원 이름"
+                android:textColor="#000000"
+                android:textStyle="bold"
+                android:textSize="20dp" />
+            <TextView
+                android:id="@+id/class_code_name_textview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="5dp"
+                android:text="종별코드명"
+                android:textColor="#8c8c8c"
+                android:textSize="13dp" />
+            <TextView
+                android:id="@+id/address_textview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="10dp"
+                android:text="주소"
+                android:textColor="#000000"
+                android:textSize="13dp" />
 
-        <LinearLayout
-            android:id="@+id/hosp_url_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="15dp"
-            android:orientation="vertical">
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="홈페이지"
-                android:textStyle="bold"
-                android:textColor="#000000" />
-            <TextView
-                android:id="@+id/hosp_url_textview"
+            <LinearLayout
+                android:id="@+id/detail_info_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="홈페이지 주소"
-                android:textColor="#0000ff" />
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/place_textview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:text="기준 장소 및 방향" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="10dp"
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/rcv_week_textview"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#000000"
+                        android:text="@string/text_rcv_week" />
+                    <TextView
+                        android:id="@+id/lunch_week_textview"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#000000"
+                        android:text="@string/text_lunch_week" />
+                    <TextView
+                        android:id="@+id/rcv_sat_textview"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#000000"
+                        android:text="@string/text_rcv_sat" />
+                    <TextView
+                        android:id="@+id/lunch_sat_textview"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#000000"
+                        android:text="@string/text_lunch_sat" />
+                    <TextView
+                        android:id="@+id/sun_textview"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#000000"
+                        android:text="@string/text_sun" />
+                    <TextView
+                        android:id="@+id/holi_textview"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#000000"
+                        android:text="@string/text_holi" />
+                </LinearLayout>
+
+                <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="10dp"
+                android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/emy_day_textview"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#000000"
+                        android:textStyle="bold"
+                        android:text="@string/text_emy_day" />
+                    <TextView
+                        android:id="@+id/emy_ngt_textview"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#000000"
+                        android:textStyle="bold"
+                        android:text="@string/text_emy_ngt" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/park_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="10dp"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#000000"
+                        android:textStyle="bold"
+                        android:text="주차장 운영 정보" />
+                    <TextView
+                        android:id="@+id/park_qty_textview"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#000000"
+                        android:text="@string/text_park_qty" />
+                    <TextView
+                        android:id="@+id/park_etc_textview"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="기타" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tel_no_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="15dp"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="전화번호"
+                    android:textStyle="bold"
+                    android:textColor="#000000" />
+                <TextView
+                    android:id="@+id/tel_no_textview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="000-0000-0000"
+                    android:textColor="#ff0000" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/hosp_url_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="15dp"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="홈페이지"
+                    android:textStyle="bold"
+                    android:textColor="#000000" />
+                <TextView
+                    android:id="@+id/hosp_url_textview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="홈페이지 주소"
+                    android:textColor="#0000ff" />
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/estb_date_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="15dp"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="개설일자 : "
+                    android:textColor="#000000" />
+                <TextView
+                    android:id="@+id/estb_date_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0000.00.00"
+                    android:textColor="#000000" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="15dp"
+                android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="의사 총 수 : "
+                        android:textColor="#000000" />
+                    <TextView
+                        android:id="@+id/doctor_tot_cnt_textview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="#000000" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=" - 전문의 : "
+                        android:textColor="#000000" />
+                    <TextView
+                        android:id="@+id/specialist_dr_cnt_textview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="#000000" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=" - 일반의 : "
+                        android:textColor="#000000" />
+                    <TextView
+                        android:id="@+id/general_dr_cnt_textview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="#000000" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=" - 레지던트 : "
+                        android:textColor="#000000" />
+                    <TextView
+                        android:id="@+id/resident_cnt_textview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="#000000" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=" - 인턴 : "
+                        android:textColor="#000000" />
+                    <TextView
+                        android:id="@+id/intern_cnt_textview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="#000000" />
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
-        <LinearLayout
-            android:id="@+id/estb_date_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="15dp"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="개설일자 : "
-                android:textColor="#000000" />
-            <TextView
-                android:id="@+id/estb_date_textview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0000.00.00"
-                android:textColor="#000000" />
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="15dp"
-            android:orientation="vertical">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="의사 총 수 : "
-                    android:textColor="#000000" />
-                <TextView
-                    android:id="@+id/doctor_tot_cnt_textview"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0"
-                    android:textColor="#000000" />
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=" - 전문의 : "
-                    android:textColor="#000000" />
-                <TextView
-                    android:id="@+id/specialist_dr_cnt_textview"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0"
-                    android:textColor="#000000" />
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=" - 일반의 : "
-                    android:textColor="#000000" />
-                <TextView
-                    android:id="@+id/general_dr_cnt_textview"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0"
-                    android:textColor="#000000" />
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=" - 레지던트 : "
-                    android:textColor="#000000" />
-                <TextView
-                    android:id="@+id/resident_cnt_textview"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0"
-                    android:textColor="#000000" />
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=" - 인턴 : "
-                    android:textColor="#000000" />
-                <TextView
-                    android:id="@+id/intern_cnt_textview"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0"
-                    android:textColor="#000000" />
-            </LinearLayout>
-        </LinearLayout>
-    </LinearLayout>
+    </ScrollView>
 </LinearLayout>

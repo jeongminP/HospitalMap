@@ -4,4 +4,13 @@
     <string name="shared_preferences_file_name">storedFile</string>
     <string name="sp_stored_department">stored_department</string>
     <string name="button_text_show_hosp_list">병원 목록 보기</string>
+    <string name="text_rcv_week">평일 진료시간 : </string>
+    <string name="text_lunch_week"> - 평일 점심시간 : </string>
+    <string name="text_rcv_sat">토요일 진료시간 : </string>
+    <string name="text_lunch_sat"> - 토요일 점심시간 : </string>
+    <string name="text_sun">일요일 </string>
+    <string name="text_holi">공휴일 </string>
+    <string name="text_emy_day">주간 응급실 운영 : </string>
+    <string name="text_emy_ngt">야간 응급실 운영 : </string>
+    <string name="text_park_qty">주차 가능 대수 : </string>
 </resources>

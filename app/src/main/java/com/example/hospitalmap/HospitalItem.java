@@ -3,7 +3,7 @@ package com.example.hospitalmap;
 import java.io.Serializable;
 
 public class HospitalItem implements Serializable {
-    private String hospName, classCodeName, deptCodeName, address, telNo, hospUrl, estbDate;
+    private String hospName, classCodeName, deptCodeName, address, telNo, hospUrl, estbDate, ykiho;
     private Integer doctorTotalCnt, specialistDoctorCnt, generalDoctorCnt, residentCnt, internCnt;
     private Double xPos, yPos;
 
@@ -61,6 +61,14 @@ public class HospitalItem implements Serializable {
 
     public void setEstbDate(String estbDate) {
         this.estbDate = estbDate;
+    }
+
+    public String getYkiho() {
+        return ykiho;
+    }
+
+    public void setYkiho(String ykiho) {
+        this.ykiho = ykiho;
     }
 
     public Integer getDoctorTotalCnt() {

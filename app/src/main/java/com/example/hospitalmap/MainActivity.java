@@ -164,7 +164,6 @@ public class MainActivity extends AppCompatActivity
                     public void onClick(DialogInterface dialog, int which) {
                         deptCode = deptCodeArray[which];
                         deptTextView.setText(deptCode.getDepartmentName());
-//                        getHospitalList(deptCode, centerEMDong);
                         getHospitalListFromDB(deptCode, centerEMDong);
                         dialog.dismiss();
                     }
@@ -442,6 +441,7 @@ public class MainActivity extends AppCompatActivity
                 String address = c.getString(c.getColumnIndex("addr"));
                 String telNo = c.getString(c.getColumnIndex("telno"));
                 String hospUrl = c.getString(c.getColumnIndex("hospUrl"));
+                String ykiho = c.getString(c.getColumnIndex("ykiho"));
 
                 Integer estbDate = c.getInt(c.getColumnIndex("estbDd"));
                 Integer doctorTotalCnt = c.getInt(c.getColumnIndex("drTotCnt"));
@@ -468,6 +468,7 @@ public class MainActivity extends AppCompatActivity
                     item.setHospUrl(hospUrl);
                 }
                 item.setEstbDate(convertDate(estbDate.toString()));
+                item.setYkiho(ykiho);
 
                 item.setDoctorTotalCnt(doctorTotalCnt);
                 item.setSpecialistDoctorCnt(specialistDoctorCnt);
