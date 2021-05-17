@@ -491,6 +491,11 @@ public class MainActivity extends AppCompatActivity
                     showListBtn.setText(getResources().getString(R.string.button_text_show_hosp_list) + " (" + hospitalItemList.size() + ")");
                     showListBtn.setClickable(true);
 
+                    if (hospitalItemList.size() == 0) {
+                        Toast.makeText(getApplicationContext(), "일치하는 결과가 없습니다.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
                     // 지도에 마킹
                     runOnUiThread(new Runnable() {
                         @Override
@@ -514,161 +519,6 @@ public class MainActivity extends AppCompatActivity
 
                     backgroundtask.dispose();
                 });
-    }
-
-    public void getHospitalList(DepartmentCode deptCode, String emdongNm) {
-        showLoadingView();
-        showListBtn.setClickable(false);
-
-        RequestQueue requestQueue;
-        Cache cache = new DiskBasedCache(getCacheDir(), 1024 * 1024);
-        Network network = new BasicNetwork(new HurlStack());
-        requestQueue = new RequestQueue(cache, network);
-        requestQueue.start();
-
-        Integer numOfRows = 100;
-
-        String url = "http://apis.data.go.kr/B551182/hospInfoService/getHospBasisList?numOfRows=" + numOfRows.toString()
-                 + "&dgsbjtCd=" + deptCode.getCode()
-                + "&emdongNm=" + emdongNm
-                + "&ServiceKey=Q%2BbQw%2FUNPpDxP9hAGr3SQzR71t%2BCRCoDcFtPYmxVpEdlObYNjUINxMD3hurNngT3r19ae%2FDHw7t%2B5YhzIm2EuA%3D%3D&_type=json";
-
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // 응답
-                        System.out.println("응답 : " + response);     // for Debug
-                        hideLoadingView();
-                        JSONParse(response);
-                        showListBtn.setClickable(true);
-
-                        // 지도에 마킹
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mMapView.removeAllPOIItems();
-                                for (int i=0; i < hospitalItemList.size(); i++) {
-                                    HospitalItem hospItem = hospitalItemList.get(i);
-                                    MapPOIItem marker = new MapPOIItem();
-                                    marker.setTag(i);
-                                    marker.setItemName(hospItem.getHospName());
-                                    marker.setUserObject(hospItem);
-                                    MapPoint mapPoint = MapPoint.mapPointWithGeoCoord(hospItem.getYPos(), hospItem.getXPos());
-                                    marker.setMapPoint(mapPoint);
-                                    marker.setMarkerType(MapPOIItem.MarkerType.BluePin);
-                                    marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin);
-                                    mMapView.addPOIItem(marker);
-                                }
-                            }
-                        });
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // 에러 처리
-                        error.printStackTrace();
-                        hideLoadingView();
-                    }
-                }){
-            @Override //response를 UTF8로 변경해주는 소스코드
-            protected Response<String> parseNetworkResponse(NetworkResponse response) {
-                try {
-                    String utf8String = new String(response.data, "UTF-8");
-                    return Response.success(utf8String, HttpHeaderParser.parseCacheHeaders(response));
-                } catch (UnsupportedEncodingException e) {
-                    // log error
-                    return Response.error(new ParseError(e));
-                } catch (Exception e) {
-                    // log error
-                    return Response.error(new ParseError(e));
-                }
-            }
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                return super.getParams();
-            }
-        };
-
-        int socketTimeout = 10000;  //10 seconds
-        RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
-        stringRequest.setRetryPolicy(policy);
-        requestQueue.add(stringRequest);
-    }
-
-    private void JSONParse(String jsonStr) {
-        hospitalItemList = new ArrayList<HospitalItem>();
-        try {
-            JSONObject bodyObject = new JSONObject(jsonStr).getJSONObject("response").getJSONObject("body");
-            Object response = bodyObject.get("items");
-            if (response instanceof String) {
-                Toast.makeText(getApplicationContext(), "일치하는 결과가 없습니다.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            JSONObject resObject = (JSONObject) response;
-            JSONArray jsonArray;
-            if (resObject.get("item") instanceof JSONArray) {
-                jsonArray = resObject.getJSONArray("item");
-            } else {
-                jsonArray = new JSONArray();
-                jsonArray.put(resObject.getJSONObject("item"));
-            }
-
-            for (int i=0; i < jsonArray.length(); i++) {
-                // 각 아이템에서 데이터 추출
-                JSONObject jsonObject = jsonArray.getJSONObject(i);
-                String hospName = jsonObject.getString("yadmNm");
-                String classCodeName = jsonObject.getString("clCdNm");
-                String address = jsonObject.getString("addr");
-                String telNo = "";
-                if (jsonObject.has("telno")) {
-                    telNo = jsonObject.getString("telno");
-                }
-                String hospUrl = "";
-                if (jsonObject.has("hospUrl")) {
-                    hospUrl = jsonObject.getString("hospUrl");
-                }
-
-                Integer estbDate = jsonObject.getInt("estbDd");
-                Integer doctorTotalCnt = jsonObject.getInt("drTotCnt");
-                Integer specialistDoctorCnt = jsonObject.getInt("sdrCnt");
-                Integer generalDoctorCnt = jsonObject.getInt("gdrCnt");
-                Integer residentCnt = jsonObject.getInt("resdntCnt");
-                Integer internCnt = jsonObject.getInt("intnCnt");
-
-                if (!jsonObject.has("XPos")) {
-                    continue;
-                }
-                Double xPos = jsonObject.getDouble("XPos");
-                Double yPos = jsonObject.getDouble("YPos");
-
-                // 새로운 HospitalItem 객체 생성
-                HospitalItem item = new HospitalItem();
-                item.setHospName(hospName);
-                item.setClassCodeName(classCodeName);
-                item.setAddress(address);
-                if (!telNo.isEmpty()) {
-                    item.setTelNo(telNo);
-                }
-                if (!hospUrl.isEmpty()) {
-                    item.setHospUrl(hospUrl);
-                }
-                item.setEstbDate(convertDate(estbDate.toString()));
-
-                item.setDoctorTotalCnt(doctorTotalCnt);
-                item.setSpecialistDoctorCnt(specialistDoctorCnt);
-                item.setGeneralDoctorCnt(generalDoctorCnt);
-                item.setResidentCnt(residentCnt);
-                item.setInternCnt(internCnt);
-
-                item.setXPos(xPos);
-                item.setYPos(yPos);
-                hospitalItemList.add(item);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
     }
 
     private String convertDate(String dateStr) {

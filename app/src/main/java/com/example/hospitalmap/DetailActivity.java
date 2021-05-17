@@ -81,6 +81,7 @@ public class DetailActivity extends Activity {
             }
         });
 
+        detailInfoView.setVisibility(View.GONE);
         getHospDetailInfo(hospitalItem.getYkiho());
 
         // 텍스트 채우기
@@ -159,9 +160,10 @@ public class DetailActivity extends Activity {
                             @Override
                             public void run() {
                                 if (item == null) {
-                                    detailInfoView.setVisibility(View.GONE);
                                     return;
                                 }
+
+                                detailInfoView.setVisibility(View.VISIBLE);
 
                                 TextView tvPlace, tvRcvWeek, tvLunchWeek, tvRcvSat, tvLunchSat, tvSun, tvHoli, tvEmyDay, tvEmyNgt, tvParkQty, tvParkEtc;
                                 View parkView;

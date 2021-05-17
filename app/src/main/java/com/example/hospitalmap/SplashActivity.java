@@ -58,7 +58,6 @@ public class SplashActivity extends Activity {
             if(!bResult) {
                 copyDB(this);
             } else {
-                System.out.println("카피 안함~~");
                 checkPermission();
             }
         } catch (Exception e) {
