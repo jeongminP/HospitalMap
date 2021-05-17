@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <RelativeLayout
+        android:id="@+id/list_title_bar"
         android:layout_width="match_parent"
-        android:layout_height="50dp">
+        android:layout_height="50dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        >
         <ImageButton
             android:id="@+id/back_btn"
             android:layout_width="wrap_content"
@@ -28,20 +32,37 @@
     </RelativeLayout>
 
     <View
+        android:id="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="#000000"/>
+        android:background="#000000"
+        android:layout_below="@id/list_title_bar"/>
 
     <com.mlsdev.animatedrv.AnimatedRecyclerView
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/list_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@+id/divider"
         android:background="#e0e0e0"
         app:animationDuration="600"
         app:layoutAnimation="@anim/layout_animation_from_bottom"
         app:layoutManagerOrientation="vertical"
         app:layoutManagerReverse="false"
         app:layoutManagerType="linear" />
+    <RelativeLayout
+        android:id="@+id/empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/divider"
+        android:background="#ffffff"
+        android:visibility="invisible" >
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="일치하는 검색 결과가 없습니다." />
 
-</LinearLayout>
+    </RelativeLayout>
+
+</RelativeLayout>

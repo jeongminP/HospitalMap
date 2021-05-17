@@ -16,6 +16,7 @@ public class ListActivity extends Activity {
     RecyclerView recyclerView;
     RecyclerViewAdapter adapter;
     ArrayList<HospitalItem> hospitalItemList;
+    View emptyView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,5 +41,11 @@ public class ListActivity extends Activity {
         adapter = new RecyclerViewAdapter(ListActivity.this, hospitalItemList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
+
+        // 검색 결과가 없을 경우 empty view 노출.
+        emptyView = findViewById(R.id.empty_view);
+        if (hospitalItemList.size() == 0) {
+            emptyView.setVisibility(View.VISIBLE);
+        }
     }
 }
