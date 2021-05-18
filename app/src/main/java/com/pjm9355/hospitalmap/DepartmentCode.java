@@ -1,4 +1,4 @@
-package com.example.hospitalmap;
+package com.pjm9355.hospitalmap;
 
 public enum DepartmentCode {
     IM("01", "내과"),

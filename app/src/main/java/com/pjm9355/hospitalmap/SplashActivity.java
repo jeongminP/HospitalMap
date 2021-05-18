@@ -1,4 +1,4 @@
-package com.example.hospitalmap;
+package com.pjm9355.hospitalmap;
 
 import android.Manifest;
 import android.app.Activity;
@@ -8,7 +8,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
-import android.database.Cursor;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.LocationManager;
@@ -20,9 +19,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
-import net.daum.mf.map.api.MapPOIItem;
-import net.daum.mf.map.api.MapPoint;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

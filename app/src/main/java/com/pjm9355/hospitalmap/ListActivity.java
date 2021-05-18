@@ -1,4 +1,4 @@
-package com.example.hospitalmap;
+package com.pjm9355.hospitalmap;
 
 import android.app.Activity;
 import android.content.Intent;

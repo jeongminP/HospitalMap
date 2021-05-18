@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">HospitalMap</string>
+    <string name="app_name">병원찾기</string>
     <string name="rest_api_key">7d2feecc4ac3c347ea3accbc8ae653fc</string>
     <string name="shared_preferences_file_name">storedFile</string>
     <string name="sp_stored_department">stored_department</string>

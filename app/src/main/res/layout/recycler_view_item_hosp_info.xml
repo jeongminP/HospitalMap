@@ -19,14 +19,6 @@
         android:textStyle="bold"
         android:textSize="20dp" />
     <TextView
-        android:id="@+id/class_code_name_textview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:text="종별코드명"
-        android:textColor="#8c8c8c"
-        android:textSize="13dp" />
-    <TextView
         android:id="@+id/address_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

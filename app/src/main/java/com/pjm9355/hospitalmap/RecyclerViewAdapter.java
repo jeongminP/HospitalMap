@@ -1,9 +1,8 @@
-package com.example.hospitalmap;
+package com.pjm9355.hospitalmap;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Paint;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,8 +11,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
@@ -21,13 +18,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private ArrayList<HospitalItem> hospitalItemList;
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView tvName, tvClCdNm, tvAddr, tvTelNo, tvUrl;
+        private final TextView tvName, tvAddr, tvTelNo, tvUrl;
 
         public ViewHolder(View view) {
             super(view);
 
             tvName = view.findViewById(R.id.hosp_name_textview);
-            tvClCdNm = view.findViewById(R.id.class_code_name_textview);
             tvAddr = view.findViewById(R.id.address_textview);
             tvTelNo = view.findViewById(R.id.tel_no_textview);
             tvUrl = view.findViewById(R.id.hosp_url_textview);
@@ -47,10 +43,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         public TextView getTvName() {
             return tvName;
-        }
-
-        public TextView getTvClCdNm() {
-            return tvClCdNm;
         }
 
         public TextView getTvAddr() { return tvAddr; }
@@ -82,7 +74,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         HospitalItem item = hospitalItemList.get(position);
 
         holder.getTvName().setText(item.getHospName());
-        holder.getTvClCdNm().setText(item.getClassCodeName());
         holder.getTvAddr().setText(item.getAddress());
 
         String telno = item.getTelNo();
@@ -91,14 +82,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         } else {
             holder.getTvTelNo().setVisibility(View.VISIBLE);
             holder.getTvTelNo().setText(telno);
-            holder.getTvTelNo().setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Uri uri = Uri.parse("tel:" + telno);
-                    Intent intent = new Intent(Intent.ACTION_DIAL, uri);
-                    activity.startActivity(intent);
-                }
-            });
         }
 
         String url = item.getHospUrl();
@@ -108,14 +91,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             holder.getTvUrl().setVisibility(View.VISIBLE);
             holder.getTvUrl().setPaintFlags(holder.getTvUrl().getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
             holder.getTvUrl().setText(url);
-            holder.getTvUrl().setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Uri uri = Uri.parse(url);
-                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                    activity.startActivity(intent);
-                }
-            });
         }
     }
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.hospitalmap">
+    package="com.pjm9355.hospitalmap">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
@@ -14,20 +14,20 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.HospitalMap"
         android:usesCleartextTraffic="true" >
-        <activity android:name=".DataActivity">
+        <activity android:name="com.pjm9355.hospitalmap.DataActivity">
         </activity>
-        <activity android:name=".SplashActivity">
+        <activity android:name="com.pjm9355.hospitalmap.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity">
+        <activity android:name="com.pjm9355.hospitalmap.MainActivity">
         </activity>
-        <activity android:name=".ListActivity">
+        <activity android:name="com.pjm9355.hospitalmap.ListActivity">
         </activity>
-        <activity android:name=".DetailActivity">
+        <activity android:name="com.pjm9355.hospitalmap.DetailActivity">
         </activity>
         <meta-data android:name="com.kakao.sdk.AppKey" android:value="2cd6ba925187026280a21dcabaf3e34a"/>
     </application>

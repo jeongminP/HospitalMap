@@ -1,4 +1,4 @@
-package com.example.hospitalmap;
+package com.pjm9355.hospitalmap;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

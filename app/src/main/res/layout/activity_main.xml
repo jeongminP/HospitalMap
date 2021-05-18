@@ -12,30 +12,39 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <LinearLayout
-        android:id="@+id/choice_dept_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+    <RelativeLayout
         android:padding="15dp"
         android:layout_margin="15dp"
         android:background="@drawable/background_basic_radius"
-
-        android:orientation="vertical" >
-        <TextView
-            android:layout_width="wrap_content"
+        android:id="@+id/choice_dept_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="진료과"
-            android:textSize="13dp"
-            android:textColor="#8c8c8c"
-            android:textStyle="bold" />
-        <TextView
-            android:id="@+id/dept_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="내과"
-            android:textSize="20dp"
-            android:textColor="#000000" />
-    </LinearLayout>
+            android:orientation="vertical" >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="진료과"
+                android:textSize="13dp"
+                android:textColor="#8c8c8c"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/dept_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="내과"
+                android:textSize="20dp"
+                android:textColor="#000000" />
+        </LinearLayout>
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/next_icon" />
+    </RelativeLayout>
 
     <Button
         android:id="@+id/show_list_btn"
@@ -49,7 +58,7 @@
         android:stateListAnimator="@null"
         android:background="@drawable/background_basic_radius"
         android:text="@string/button_text_show_hosp_list"
-        android:textColor="#0000ff"/>
+        android:textColor="#000000"/>
 
     <ImageButton
         android:id="@+id/current_location_btn"

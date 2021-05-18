@@ -1,4 +1,4 @@
-package com.example.hospitalmap;
+package com.pjm9355.hospitalmap;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -21,43 +21,20 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.android.volley.AuthFailureError;
-import com.android.volley.Cache;
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Network;
-import com.android.volley.NetworkResponse;
-import com.android.volley.ParseError;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.RetryPolicy;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.BasicNetwork;
-import com.android.volley.toolbox.DiskBasedCache;
-import com.android.volley.toolbox.HttpHeaderParser;
-import com.android.volley.toolbox.HurlStack;
-import com.android.volley.toolbox.StringRequest;
 
 import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapReverseGeoCoder;
 import net.daum.mf.map.api.MapView;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Map;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -72,7 +49,7 @@ public class MainActivity extends AppCompatActivity
     private static final String LOG_TAG = "MainActivity";
 
     private MapView mMapView;
-    private LinearLayout choiceView;
+    private RelativeLayout choiceView;
     private TextView deptTextView;
     private ImageButton currentLocationBtn;
     private Button showListBtn;
@@ -318,7 +295,6 @@ public class MainActivity extends AppCompatActivity
         HospitalItem selectedItem = (HospitalItem) mapPOIItem.getUserObject();
 
         tvName.setText(selectedItem.getHospName());
-        tvClCdNm.setText(selectedItem.getClassCodeName());
         tvAddr.setText(selectedItem.getAddress());
 
         String telno = selectedItem.getTelNo();
@@ -365,6 +341,20 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        // DB에서 진료과 검색
+        String mQuery = "SELECT * FROM tb_dgsbjt WHERE ykiho = ?";
+        Cursor c = db.rawQuery(mQuery, new String[]{selectedItem.getYkiho()});
+        String dgsbjtStr = "";
+
+        while (c.moveToNext()) {
+            dgsbjtStr += c.getString(c.getColumnIndex("dgsbjtCdNm")) + ", ";
+        }
+        if(!dgsbjtStr.isEmpty()) {
+            dgsbjtStr = dgsbjtStr.substring(0, dgsbjtStr.length() - 2);
+        }
+        System.out.println(dgsbjtStr);
+
+        tvClCdNm.setText(selectedItem.getClassCodeName() + " | " + dgsbjtStr);
         infoView.setVisibility(View.VISIBLE);
     }
 
