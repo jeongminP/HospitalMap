@@ -483,7 +483,6 @@ public class MainActivity extends AppCompatActivity
 
                     if (hospitalItemList.size() == 0) {
                         Toast.makeText(getApplicationContext(), "일치하는 결과가 없습니다.", Toast.LENGTH_SHORT).show();
-                        return;
                     }
 
                     // 지도에 마킹
