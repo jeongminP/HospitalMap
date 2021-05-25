@@ -288,10 +288,12 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onPOIItemSelected(MapView mapView, MapPOIItem mapPOIItem) {
         TextView tvName = findViewById(R.id.hosp_name_textview);
+        TextView tvDistance = findViewById(R.id.distance_textview);
         TextView tvClCdNm = findViewById(R.id.class_code_name_textview);
         TextView tvAddr = findViewById(R.id.address_textview);
         TextView tvTelNo = findViewById(R.id.tel_no_textview);
         TextView tvUrl = findViewById(R.id.hosp_url_textview);
+        View vTelNo = findViewById(R.id.tel_no_view);
 
         HospitalItem selectedItem = (HospitalItem) mapPOIItem.getUserObject();
 
@@ -300,12 +302,12 @@ public class MainActivity extends AppCompatActivity
 
         String telno = selectedItem.getTelNo();
         if (telno==null || telno.isEmpty()) {
-            tvTelNo.setVisibility(View.GONE);
+            vTelNo.setVisibility(View.GONE);
         } else {
-            tvTelNo.setVisibility(View.VISIBLE);
+            vTelNo.setVisibility(View.VISIBLE);
             tvTelNo.setText(telno);
 
-            tvTelNo.setOnClickListener(new View.OnClickListener() {
+            vTelNo.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Uri uri = Uri.parse("tel:" + telno);

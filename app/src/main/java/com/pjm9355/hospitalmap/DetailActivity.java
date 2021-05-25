@@ -188,7 +188,7 @@ public class DetailActivity extends Activity {
                                     telNoView.setVisibility(View.GONE);
                                 } else {
                                     tvTelNo.setText(telno);
-                                    tvTelNo.setOnClickListener(new View.OnClickListener() {
+                                    telNoView.setOnClickListener(new View.OnClickListener() {
                                         @Override
                                         public void onClick(View v) {
                                             Uri uri = Uri.parse("tel:" + telno);
@@ -204,7 +204,7 @@ public class DetailActivity extends Activity {
                                 } else {
                                     tvUrl.setPaintFlags(tvUrl.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
                                     tvUrl.setText(url);
-                                    tvUrl.setOnClickListener(new View.OnClickListener() {
+                                    hospUrlView.setOnClickListener(new View.OnClickListener() {
                                         @Override
                                         public void onClick(View v) {
                                             Uri uri = Uri.parse(url);

@@ -19,6 +19,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView tvName, tvAddr, tvTelNo, tvUrl;
+        private final View vTelNo;
 
         public ViewHolder(View view) {
             super(view);
@@ -27,6 +28,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             tvAddr = view.findViewById(R.id.address_textview);
             tvTelNo = view.findViewById(R.id.tel_no_textview);
             tvUrl = view.findViewById(R.id.hosp_url_textview);
+            vTelNo = view.findViewById(R.id.tel_no_view);
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -54,6 +56,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         public TextView getTvUrl() {
             return tvUrl;
         }
+
+        public View getVTelNo() { return vTelNo; }
     }
 
     public RecyclerViewAdapter(Activity a, ArrayList<HospitalItem> hospitalItemList) {
@@ -78,9 +82,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
         String telno = item.getTelNo();
         if (telno==null || telno.isEmpty()) {
-            holder.getTvTelNo().setVisibility(View.GONE);
+            holder.getVTelNo().setVisibility(View.GONE);
         } else {
-            holder.getTvTelNo().setVisibility(View.VISIBLE);
+            holder.getVTelNo().setVisibility(View.VISIBLE);
             holder.getTvTelNo().setText(telno);
         }
 
