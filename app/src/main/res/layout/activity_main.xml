@@ -14,7 +14,8 @@
 
     <RelativeLayout
         android:padding="15dp"
-        android:layout_margin="15dp"
+        android:layout_marginHorizontal="15dp"
+        android:layout_marginTop="15dp"
         android:background="@drawable/background_basic_radius"
         android:id="@+id/choice_dept_view"
         android:layout_width="match_parent"
@@ -45,6 +46,18 @@
             android:layout_alignParentRight="true"
             android:src="@drawable/next_icon" />
     </RelativeLayout>
+
+    <TextView
+        android:id="@+id/emd_textview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/choice_dept_view"
+        android:layout_marginTop="5dp"
+        android:layout_marginHorizontal="15dp"
+        android:textColor="#ff0000"
+        android:textStyle="bold"
+        android:textSize="17dp"
+        android:textAlignment="textEnd" />
 
     <Button
         android:id="@+id/show_list_btn"

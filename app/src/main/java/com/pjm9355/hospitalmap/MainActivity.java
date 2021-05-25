@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity
 
     private MapView mMapView;
     private RelativeLayout choiceView;
-    private TextView deptTextView;
+    private TextView deptTextView, emdTextView;
     private ImageButton currentLocationBtn;
     private Button showListBtn;
     private View infoView;
@@ -88,6 +88,7 @@ public class MainActivity extends AppCompatActivity
 
         choiceView = findViewById(R.id.choice_dept_view);
         deptTextView = findViewById(R.id.dept_textview);
+        emdTextView = findViewById(R.id.emd_textview);
         currentLocationBtn = findViewById(R.id.current_location_btn);
         showListBtn = findViewById(R.id.show_list_btn);
         infoView = findViewById(R.id.info_view);
@@ -391,6 +392,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         centerEMDong = newEMDong;
+        emdTextView.setText(centerEMDong);
         getHospitalListFromDB(deptCode, centerEMDong);
         onFinishReverseGeoCoding(s);
     }
