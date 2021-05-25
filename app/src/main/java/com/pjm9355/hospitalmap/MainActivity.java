@@ -360,12 +360,15 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem) {
-
+        // Deprecated
     }
 
     @Override
     public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem, MapPOIItem.CalloutBalloonButtonType calloutBalloonButtonType) {
-
+        HospitalItem selectedItem = (HospitalItem) mapPOIItem.getUserObject();
+        Intent intent = new Intent(getApplicationContext(), DetailActivity.class);
+        intent.putExtra("hospitalItem", selectedItem);
+        startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP));
     }
 
     @Override
@@ -388,7 +391,6 @@ public class MainActivity extends AppCompatActivity
         }
 
         centerEMDong = newEMDong;
-//        getHospitalList(deptCode, centerEMDong);
         getHospitalListFromDB(deptCode, centerEMDong);
         onFinishReverseGeoCoding(s);
     }
@@ -500,7 +502,6 @@ public class MainActivity extends AppCompatActivity
                                 marker.setMapPoint(mapPoint);
                                 marker.setMarkerType(MapPOIItem.MarkerType.BluePin);
                                 marker.setSelectedMarkerType(MapPOIItem.MarkerType.RedPin);
-                                marker.setShowDisclosureButtonOnCalloutBalloon(false);
                                 mMapView.addPOIItem(marker);
                             }
                         }
